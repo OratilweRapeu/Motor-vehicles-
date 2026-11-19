@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cars for sale | East Rand</title>
+<meta name="description" content="Current stock, prices and details. Message on WhatsApp to view or reserve.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<style>
+:root{--ink:#111827;--mut:#5b6472;--bg:#f3f4f6;--card:#fff;--line:#e0e3e8;--blue:#0a1f8f;--tag:#ffd23f;--wa:#16a34a}
+@media (prefers-color-scheme:dark){:root{--ink:#f3f4f6;--mut:#a2a9b5;--bg:#0e1116;--card:#171b22;--line:#2a303a;--blue:#6f86ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Archivo,system-ui,sans-serif;line-height:1.45}
+header{background:#0a1f8f;color:#fff;padding:28px 18px 22px}
+.wrap{max-width:1040px;margin:0 auto}
+h1{margin:0 0 6px;font-size:clamp(1.7rem,6vw,2.6rem);font-weight:800;letter-spacing:-.02em}
+header p{margin:0;opacity:.85;max-width:46ch}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:18px auto}
+.bar input,.bar select{font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.bar input{flex:1 1 220px}
+.count{color:var(--mut);margin:0 0 12px;font-size:.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;padding-bottom:30px}
+.car{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.pic{aspect-ratio:4/3;background:#d6d9df center/cover;display:grid;place-items:center;color:#7a828f;font-size:.9rem;position:relative}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.feat{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.feat span{font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--mut)}
+.price{z-index:1;position:absolute;left:0;bottom:14px;background:var(--tag);color:#111;font-weight:800;font-size:1.25rem;padding:6px 14px 6px 12px;border-radius:0 8px 8px 0}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.car h2{margin:0;font-size:1.1rem;font-weight:800}
+dl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;margin:0;font-size:.93rem}
+dt{color:var(--mut)}dd{margin:0;font-weight:600}
+.btns{display:flex;gap:8px;margin-top:auto}
+.btns a{flex:1;text-align:center;padding:11px 8px;border-radius:10px;font-weight:600;text-decoration:none}
+.wa{background:var(--wa);color:#fff}
+.more{border:1px solid var(--line);color:var(--ink)}
+a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--tag);outline-offset:2px}
+.empty{padding:40px 0;color:var(--mut)}
+footer{border-top:1px solid var(--line);padding:20px 18px 40px;color:var(--mut);font-size:.85rem}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1 id="title">Cars for sale</h1>
+<p id="sub">Current stock with prices. Tap WhatsApp to ask about a car or book a viewing.</p>
+</div></header>
+
+<main class="wrap" style="padding:0 18px">
+<div class="bar">
+<input id="q" type="search" placeholder="Search make or model, e.g. Chery" aria-label="Search cars">
+<select id="sort" aria-label="Sort cars">
+<option value="new">Newest added</option>
+<option value="lo">Price: low to high</option>
+<option value="hi">Price: high to low</option>
+<option value="km">Lowest mileage</option>
+</select>
+</div>
+<p class="count" id="count"></p>
+<div class="grid" id="grid"></div>
+</main>
+
+<footer><div class="wrap">
+<span id="foot"></span>
+</div></footer>
+
+<script>
+/* ============ EDIT THIS SECTION ============ */
+const SETTINGS = {
+  sellerName: "Mishack Rapeu",          // shown in the footer
+  dealership: "East Rand Multifranchise",
+  whatsapp: "27762210268",                // country code, no + or spaces, e.g. 27821234567
+};
+
+/* One block per car. Newest car goes at the TOP.
+   PHOTOS: upload a photo to the repo named after the stock number with "/" as "-", e.g. 1824446-1.jpg. It shows up automatically.
+   (To use a different file name, write it in img.)
+   link: the cms360 link for that car */
+const CARS = [
+  {
+    "stock": "1828004/1",
+    "title": "CHERY Tiggo 4 Cross 1.5 Lit",
+    "year": 2026,
+    "price": 289900,
+    "kms": 3336,
+    "colour": "White",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "Yes",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=4F401A7B-6724-4834-ADF4-1F1DECC36F25"
+  },
+  {
+    "stock": "1824446/1",
+    "title": "FORD Ranger 2.3 Wildtrak A/T Double Cab",
+    "year": 2026,
+    "price": 769900,
+    "kms": 8000,
+    "colour": "Orange",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "ABS",
+      "Air Conditioner",
+      "Driver & Passenger Airbags",
+      "Bluetooth",
+      "Central Locking",
+      "Electric Windows (Front)",
+      "Electric Windows (Rear)",
+      "Reverse Camera",
+      "Side Steps",
+      "Towbar"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=2D889725-1E8F-4C88-9613-BCEB1EA471B3"
+  },
+  {
+    "stock": "1751015/1",
+    "title": "HONDA Elevate Comfort 1.5 6MT",
+    "year": 2025,
+    "price": 247800,
+    "kms": 31284,
+    "colour": "Meteoroid Gray",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=CFCB8366-AA37-4475-A9ED-3346A7A0224B"
+  },
+  {
+    "stock": "1819689/1",
+    "title": "HYUNDAI Bakkie 2.6 Skd A/C Deck F/L",
+    "year": 2026,
+    "price": 389900,
+    "kms": 10,
+    "colour": "White",
+    "fuel": "Diesel",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=887AB447-ADF0-4508-B8D3-3C1965A9CFDD"
+  },
+  {
+    "stock": "1635815/1",
+    "title": "MITSUBISHI Pajero Sport 2.4 4x4 A/T MY21",
+    "year": 2021,
+    "price": 454900,
+    "kms": 87789,
+    "colour": "White Diamond",
+    "fuel": "Diesel",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "Driver & Passenger Airbags",
+      "Bluetooth",
+      "Central Locking",
+      "Electric Windows (Front)",
+      "Electric Windows (Rear)",
+      "Leather Seats",
+      "Radio/USB"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=92ECCA07-5885-4DB7-9496-3A3E8685CBF4"
+  },
+  {
+    "stock": "1821271/1",
+    "title": "OMODA C5 1.5t Style",
+    "year": 2025,
+    "price": 315900,
+    "kms": 38722,
+    "colour": "White",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=0297D533-6B96-4646-844C-9D015621D277"
+  },
+  {
+    "stock": "1691466/1",
+    "title": "RENAULT Duster 1.2L Turbo Zen 4WD MHEV",
+    "year": 2025,
+    "price": 390900,
+    "kms": 28111,
+    "colour": "Metallic Terracotta Brown",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=E7B44660-4847-47EF-88B9-3F235543C8EE"
+  },
+  {
+    "stock": "1700431/1",
+    "title": "RENAULT Duster 1.3L Turbo Zen EDC 4x2",
+    "year": 2026,
+    "price": 355900,
+    "kms": 29327,
+    "colour": "Base White",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=704442FF-52AD-42AB-A72A-FFDDCF8AB621"
+  },
+  {
+    "stock": "1739473/1",
+    "title": "RENAULT Kiger 1.0 Turbo Intens CVT",
+    "year": 2026,
+    "price": 274900,
+    "kms": 29065,
+    "colour": "Metallic Silver, Black Roof",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=B276DCE1-B883-4402-9687-B698E529CE76"
+  },
+  {
+    "stock": "1746970/1",
+    "title": "RENAULT Captur 1.3L Turbo Iconic EDC",
+    "year": 2026,
+    "price": 396900,
+    "kms": 28234,
+    "colour": "Metallic Iron Blue, Black Roof",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=5AF026CE-15B8-4D1E-9F22-30ABA6148660"
+  },
+  {
+    "stock": "1746968/1",
+    "title": "RENAULT Captur 1.3L Turbo Techno EDC",
+    "year": 2026,
+    "price": 445900,
+    "kms": 33,
+    "colour": "Metallic Passion Red, Black Roof",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=3DD6BEFF-5113-4087-82D3-6F4DDCF8A699"
+  },
+  {
+    "stock": "1748800/1",
+    "title": "RENAULT Kwid 1.0L Climber (S&C Airbags)",
+    "year": 2026,
+    "price": 160900,
+    "kms": 18433,
+    "colour": "Metallic Silver",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=0EF4D2FA-2DB9-4092-AB30-F28158E88A87"
+  },
+  {
+    "stock": "1784158/1",
+    "title": "RENAULT Kiger 1.0 Turbo Intens CVT",
+    "year": 2026,
+    "price": 279900,
+    "kms": 100,
+    "colour": "Metallic Red, Black Roof",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=E35C7302-0DDD-4270-8B3F-6F89116FBB24"
+  },
+  {
+    "stock": "1804677/1",
+    "title": "RENAULT Triber 1.0L Techno",
+    "year": 2026,
+    "price": 224900,
+    "kms": 1500,
+    "colour": "Base White",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "Yes",
+    "features": [
+      "Air Conditioner",
+      "Driver & Passenger Airbags",
+      "Apple CarPlay | Android Auto",
+      "Bluetooth",
+      "Central Locking",
+      "Cloth Trim",
+      "Convenience Telephony",
+      "Electric Windows (Front)",
+      "Electric Windows (Rear)",
+      "Radio/USB",
+      "Smash and Grab"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=ACB5B163-23BF-4953-A741-481B5888F154"
+  },
+  {
+    "stock": "1832039/1",
+    "title": "SUZUKI Swift 1.2 GL",
+    "year": 2025,
+    "price": 199900,
+    "kms": 27425,
+    "colour": "White",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "Bluetooth",
+      "Central Locking",
+      "Cloth Trim",
+      "Electric Windows (Front)",
+      "Radio/USB"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=1F425431-FE1B-4B74-8EEF-942AA4CC7613"
+  },
+  {
+    "stock": "1827154/1",
+    "title": "SUZUKI Ertiga 1.5 GA MT",
+    "year": 2026,
+    "price": 359900,
+    "kms": 100,
+    "colour": "Arctic White Pearl",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "Driver & Passenger Airbags",
+      "Central Locking",
+      "Cloth Trim",
+      "Electric Windows (Front)",
+      "Service Plan (balance of)"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=33CD19ED-0AED-4383-BD6D-CF189592D76C"
+  },
+  {
+    "stock": "1821249/1",
+    "title": "TATA Punch 1.2 Adventure",
+    "year": 2026,
+    "price": 194900,
+    "kms": 30343,
+    "colour": "Grey",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=B3CF759F-D3F6-49BA-924E-1DA99C50ADEF"
+  },
+  {
+    "stock": "1821247/1",
+    "title": "TATA Punch 1.2 Adventure +s",
+    "year": 2026,
+    "price": 199900,
+    "kms": 15356,
+    "colour": "White",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=A5D14DF1-EB2E-42BA-9A23-F08F66B9CEC6"
+  },
+  {
+    "stock": "1829395/1",
+    "title": "TOYOTA Cross 1.8 Xr Hybrid",
+    "year": 2024,
+    "price": 409900,
+    "kms": 19000,
+    "colour": "Grey",
+    "fuel": "Hybrid",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "ABS",
+      "Driver & Passenger Airbags",
+      "Bluetooth",
+      "Central Locking",
+      "Cruise Control",
+      "Electric Windows (Front)",
+      "Electric Windows (Rear)",
+      "Isofix Rear Seats",
+      "Leather Trim",
+      "Radio/USB",
+      "Service Plan (balance of)"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=C54C038E-8B46-4740-A400-EF1C4F3A8C48"
+  },
+  {
+    "stock": "1822829/1",
+    "title": "VOLKSWAGEN Polo Vivo 1.4 Life (5dr)",
+    "year": 2026,
+    "price": 249900,
+    "kms": 10192,
+    "colour": "Blue",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "Yes",
+    "maintenancePlan": "No",
+    "warranty": "Yes",
+    "features": [
+      "ABS",
+      "Air Conditioner",
+      "Airbags (Driver, Passenger & Sides)",
+      "Alloy Wheels",
+      "Apple CarPlay | Android Auto",
+      "Audio Control on Steering Wheel",
+      "Bluetooth",
+      "Central Locking Key",
+      "Cloth Trim",
+      "Comfort Access",
+      "Convenience Telephony",
+      "Electric Windows (Front)",
+      "Front Fog Lamps",
+      "Rear Park Distance Control",
+      "Reverse Camera"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=0C6A984F-29F7-4D48-B287-5668CE0CD6B7"
+  },
+  {
+    "stock": "1807107/1",
+    "title": "VOLKSWAGEN Polo Vivo 1.4 Life (5dr)",
+    "year": 2026,
+    "price": 264900,
+    "kms": 1000,
+    "colour": "Silver",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "Yes",
+    "maintenancePlan": "No",
+    "warranty": "Yes",
+    "features": [
+      "Alarm",
+      "Alloy Wheels",
+      "Apple CarPlay | Android Auto",
+      "Central Locking"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=57289830-1D9B-4C52-9965-DA4FA3D4D511"
+  },
+  {
+    "stock": "1832042/1",
+    "title": "TOYOTA Vitz 1.0 Xr AMT",
+    "year": 2025,
+    "price": 209900,
+    "kms": 14670,
+    "colour": "Silver",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "Driver & Passenger Airbags",
+      "Bluetooth",
+      "Central Locking",
+      "Cloth Trim",
+      "Electric Windows (Front)"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=AF189B2E-82A8-4AEB-9C07-9225FAD57FD0"
+  },
+  {
+    "stock": "1832027/1",
+    "title": "SUZUKI Swift 1.2 GL",
+    "year": 2025,
+    "price": 199900,
+    "kms": 22052,
+    "colour": "Silver",
+    "fuel": "Petrol",
+    "trans": "Manual",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [
+      "Central Locking",
+      "Cloth Trim",
+      "Electric Windows (Front)",
+      "Radio/USB"
+    ],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=EAEE1D1A-E08E-4F7C-B96B-E6A261E70DDB"
+  },
+  {
+    "stock": "1796444/2",
+    "title": "RENAULT Trafic 2.0L dCi Auto Evolution+",
+    "year": 2026,
+    "price": 959800,
+    "kms": 150,
+    "colour": "Metallic Highland Silver",
+    "fuel": "Diesel",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=CB3B4A31-8767-476F-8F35-C26097098FDE"
+  },
+  {
+    "stock": "1809979/1",
+    "title": "FORD Territory Titanium 1.8L Ecoboost A/T",
+    "year": 2026,
+    "price": 569900,
+    "kms": 5400,
+    "colour": "White",
+    "fuel": "Petrol",
+    "trans": "Automatic",
+    "servicePlan": "No",
+    "maintenancePlan": "No",
+    "warranty": "No",
+    "features": [],
+    "img": "",
+    "link": "https://aws-prod-stock-mobi.cms360.cloud/detail?stockGuid=A2C4AE4D-F2AF-4BC7-9C66-6159D370EE42"
+  }
+];
+/* ============================================ */
+
+const $ = id => document.getElementById(id);
+const rand = n => "R " + n.toLocaleString("en-ZA").replace(/,/g, " ");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function card(c){
+  const msg = encodeURIComponent(`Hi, I'm interested in the ${c.year} ${c.title} (stock no. ${c.stock}). Is it still available?`);
+  const src = c.img || c.stock.replace("/","-") + ".jpg";
+  const pic = `<div class="pic"><span>Photos on full details page</span><img src="${esc(src)}" alt="${esc(c.title)}" loading="lazy" onerror="this.remove()">`;
+  const feat = (c.features && c.features.length) ? `<p class="feat">${c.features.map(f=>`<span>${esc(f)}</span>`).join("")}</p>` : "";
+  return `<article class="car">${pic}<span class="price">${rand(c.price)}</span></div>
+  <div class="body"><h2>${esc(c.year)} ${esc(c.title)}</h2>
+  <dl><dt>Mileage</dt><dd>${c.kms.toLocaleString("en-ZA").replace(/,/g," ")} km</dd>
+  <dt>Colour</dt><dd>${esc(c.colour)}</dd>
+  <dt>Fuel</dt><dd>${esc(c.fuel)}</dd>
+  <dt>Gearbox</dt><dd>${esc(c.trans)}</dd>
+  <dt>Service plan</dt><dd>${esc(c.servicePlan)}</dd>
+  <dt>Maintenance plan</dt><dd>${esc(c.maintenancePlan)}</dd>
+  <dt>Warranty</dt><dd>${esc(c.warranty)}</dd>
+  <dt>Stock no.</dt><dd>${esc(c.stock)}</dd></dl>${feat}
+  <div class="btns"><a class="wa" href="https://wa.me/${SETTINGS.whatsapp}?text=${msg}">WhatsApp</a>
+  ${c.link ? `<a class="more" href="${esc(c.link)}" target="_blank" rel="noopener">Full details</a>` : ""}</div></div></article>`;
+}
+
+function render(){
+  const q = $("q").value.trim().toLowerCase(), s = $("sort").value;
+  let list = CARS.map((c,i)=>({...c,i})).filter(c => (c.title+" "+c.colour+" "+c.year).toLowerCase().includes(q));
+  if (s==="lo") list.sort((a,b)=>a.price-b.price);
+  if (s==="hi") list.sort((a,b)=>b.price-a.price);
+  if (s==="km") list.sort((a,b)=>a.kms-b.kms);
+  $("count").textContent = list.length + (list.length===1 ? " car available" : " cars available");
+  $("grid").innerHTML = list.length ? list.map(card).join("") : `<p class="empty">No cars match that search. Clear the search box to see all stock.</p>`;
+}
+
+$("foot").textContent = `Listed by ${SETTINGS.sellerName}, sales consultant at ${SETTINGS.dealership}. Prices and availability can change; confirm with the dealership.`;
+$("q").addEventListener("input", render);
+$("sort").addEventListener("change", render);
+render();
+</script>
+</body>
+</html>
